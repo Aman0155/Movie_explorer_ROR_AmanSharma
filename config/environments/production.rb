@@ -94,6 +94,6 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-  config.action_mailer.default_url_options = { host: "https://movie-explorer-app.onrender.com" }
-  Rails.application.routes.default_url_options[:host] = "https://movie-explorer-app.onrender.com"
+  config.action_mailer.default_url_options = { host: "https://movie-explorer-ror-amansharma.onrender.com" }
+  Rails.application.routes.default_url_options[:host] = "https://movie-explorer-ror-amansharma.onrender.com"
 end
