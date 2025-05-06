@@ -368,13 +368,6 @@ paths:
                 movie[description]:
                   type: string
                   description: Description of the movie (max 1000 characters)
-                movie[main_lead]:
-                  type: string
-                  description: Main lead actor/actress of the movie
-                movie[streaming_platform]:
-                  type: string
-                  description: Streaming platform (Amazon, Netflix, Hulu, Disney+, HBO)
-                  enum: ["Amazon", "Netflix", "Hulu", "Disney+", "HBO"]
                 movie[premium]:
                   type: boolean
                   description: Whether the movie is premium
@@ -511,15 +504,6 @@ components:
         banner_url:
           type: string
           description: URL of the movie banner (from Cloudinary)
-          nullable: true
-        main_lead:
-          type: string
-          description: Main lead actor/actress of the movie
-          nullable: true
-        streaming_platform:
-          type: string
-          description: Streaming platform (Amazon, Netflix, Hulu, Disney+, HBO)
-          enum: ["Amazon", "Netflix", "Hulu", "Disney+", "HBO"]
           nullable: true
       required:
         - id

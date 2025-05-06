@@ -31,6 +31,8 @@ gem 'factory_bot_rails'
 gem 'faker' 
 gem 'stripe'
 gem 'fcm'
+gem 'arctic_admin'
+gem 'sassc-rails'
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]

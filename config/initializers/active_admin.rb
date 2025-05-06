@@ -5,7 +5,7 @@ ActiveAdmin.setup do |config|
   # for each of the active admin pages.
   #
   config.site_title = "Movie Explorer App"
-
+  
   # Set the link url for the title. For example, to take
   # users to your main site. Defaults to no link.
   #
@@ -90,6 +90,7 @@ ActiveAdmin.setup do |config|
   # resources, you may set a namespace here that Pundit will search
   # within when looking for a resource's policy.
   # config.pundit_policy_namespace = :admin
+  meta_tags_options = { viewport: 'width=device-width, initial-scale=1' }
 
   # You can customize your CanCan Ability class name here.
   # config.cancan_ability_class = "Ability"
