@@ -33,7 +33,8 @@ gem 'stripe'
 gem 'fcm'
 gem 'arctic_admin'
 gem 'sassc-rails'
-
+gem 'googleauth'
+gem 'httparty'
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
 end
