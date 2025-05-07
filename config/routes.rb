@@ -12,7 +12,7 @@ Rails.application.routes.draw do
       resources :movies, only: [:index, :show, :create, :update, :destroy]
       resources :subscriptions, only: [:create]
 
-      get 'subscriptions/status', to: 'subscrpitons#status'
+      get 'subscriptions/status', to: 'subscriptions#status'
       get 'subscriptions/success', to: 'subscriptions#success'
       get 'subscriptions/cancel', to: 'subscriptions#cancel'
       
