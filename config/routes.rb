@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get 'subscriptions/status', to: 'subscrpitons#status'
       get 'subscriptions/success', to: 'subscriptions#success'
       get 'subscriptions/cancel', to: 'subscriptions#cancel'
+      
     end
   end
 end
