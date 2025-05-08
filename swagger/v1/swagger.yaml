@@ -1,9 +1,8 @@
----
 openapi: 3.0.1
 info:
   title: API V1
   version: v1
-  description: API for managing users and movies
+  description: API for managing users, movies, and subscriptions
 paths:
   "/users":
     post:
@@ -518,6 +517,141 @@ paths:
                   error:
                     type: string
                     example: "Movie not found"
+  "/api/v1/subscriptions":
+    post:
+      summary: Create a subscription
+      tags:
+      - Subscriptions
+      security:
+      - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_type:
+                  type: string
+                  enum: ["1_day", "1_month", "3_months"]
+                  description: The type of subscription plan
+              required:
+              - plan_type
+        required: true
+      responses:
+        '200':
+          description: Subscription session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    description: Stripe checkout session ID
+                  url:
+                    type: string
+                    description: URL to redirect user for payment
+                required:
+                - session_id
+                - url
+        '400':
+          description: Invalid plan type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid plan type"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+  "/api/v1/subscriptions/status":
+    get:
+      summary: Check subscription status
+      tags:
+      - Subscriptions
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Subscription status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan_type:
+                    type: string
+                    enum: ["free", "basic", "premium"]
+                    description: Current subscription plan type
+                  message:
+                    type: string
+                    description: Additional message (e.g., downgrade notice)
+                    nullable: true
+                required:
+                - plan_type
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        '404':
+          description: No active subscription found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No active subscription found"
+  "/api/v1/subscriptions/success":
+    get:
+      summary: Handle successful subscription payment
+      tags:
+      - Subscriptions
+      parameters:
+      - name: session_id
+        in: query
+        description: Stripe checkout session ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Subscription updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Subscription updated successfully"
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Subscription not found"
 servers:
 - url: http://localhost:3000
   description: Local server
@@ -616,3 +750,38 @@ components:
           example: "abc123def456"
       required:
         - device_token
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the subscription
+        user_id:
+          type: integer
+          description: ID of the associated user
+        plan_type:
+          type: string
+          enum: ["free", "basic", "premium"]
+          description: Type of subscription plan
+        status:
+          type: string
+          enum: ["active", "inactive", "cancelled"]
+          description: Status of the subscription
+        stripe_customer_id:
+          type: string
+          description: Stripe customer ID
+          nullable: true
+        stripe_subscription_id:
+          type: string
+          description: Stripe subscription ID
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          description: Subscription expiration date
+          nullable: true
+      required:
+        - id
+        - user_id
+        - plan_type
+        - status

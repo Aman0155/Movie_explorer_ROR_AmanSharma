@@ -5,7 +5,17 @@ module Api
       skip_before_action :verify_authenticity_token, if: :json_request?
 
       def current
-        render json: { id: current_user.id, email: current_user.email, role: current_user.role }
+        if @current_user
+          render json: {
+            id: @current_user.id,
+            name: @current_user.name,
+            email: @current_user.email,
+            mobile_number: @current_user.mobile_number,
+            role: @current_user.role
+          }, status: :ok
+        else
+          render json: { error: 'No user signed in' }, status: :unauthorized
+        end
       end
 
       def update_device_token
