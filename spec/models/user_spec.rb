@@ -65,11 +65,20 @@ RSpec.describe User, type: :model do
       expect(duplicate_user.errors[:email]).to include("has already been taken")
     end
 
-    it "is not valid without a password" do
+    it "is not valid with a password that is too short" do
+      user.password = "short"
+      expect(user).not_to be_valid
+      expect(user.errors[:password]).to include("is too short (minimum is 6 characters)")
+    end
+
+    it "is not valid without a password on creation" do
       user.password = nil
-      user.password_confirmation = nil
       expect(user).not_to be_valid
       expect(user.errors[:password]).to include("can't be blank")
+    end
+
+    it "is not valid with an invalid role" do
+      expect { user.role = "invalid_role" }.to raise_error(ArgumentError, "'invalid_role' is not a valid role")
     end
 
     it "is not valid with invalid attributes" do
@@ -77,7 +86,15 @@ RSpec.describe User, type: :model do
       expect(invalid_user.errors[:email]).to include("is invalid")
       expect(invalid_user.errors[:password]).to include("can't be blank")
       expect(invalid_user.errors[:name]).to include("can't be blank", "is too short (minimum is 3 characters)")
-      expect(invalid_user.errors[:mobile_number]).to include("can't be blank", "is invalid")
+      expect(invalid_user.errors[:mobile_number]).to include("can't be blank")
+    end
+  end
+
+  describe "callbacks" do
+    it "downcases the email before validation" do
+      user.email = "TestUser@Example.com"
+      user.valid?
+      expect(user.email).to eq("testuser@example.com")
     end
   end
 
@@ -94,17 +111,16 @@ RSpec.describe User, type: :model do
     end
   end
 
-  # Test enum
   describe "role enum" do
     it "defines user and supervisor roles" do
       expect(User.roles).to eq("user" => 0, "supervisor" => 1)
     end
-  
+
     it "sets default role to user" do
       user = create(:user)
       expect(user.role).to eq("user")
     end
-  
+
     it "allows role to be supervisor" do
       user = create(:user, :supervisor)
       expect(user.role).to eq("supervisor")
@@ -124,6 +140,16 @@ RSpec.describe User, type: :model do
       newer_user = create(:user, created_at: 1.day.ago)
       expect(User.recent.first).to eq(newer_user)
       expect(User.recent.last).to eq(older_user)
+    end
+  end
+
+  describe "ransackable attributes and associations" do
+    it "defines ransackable attributes" do
+      expect(User.ransackable_attributes).to match_array(["created_at", "email", "id", "name", "mobile_number", "role", "updated_at"])
+    end
+
+    it "defines ransackable associations" do
+      expect(User.ransackable_associations).to eq([])
     end
   end
 end

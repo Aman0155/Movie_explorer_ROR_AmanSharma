@@ -2,7 +2,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
   skip_before_action :verify_authenticity_token
   skip_before_action :require_no_authentication, only: [:create] 
-  before_action :log_request
 
   def create
     build_resource(sign_up_params)
@@ -30,10 +29,5 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def sign_up_params
     params.require(:user).permit(:email, :password, :name, :mobile_number)
-  end
-  def log_request
-    Rails.logger.info "Headers: #{request.headers.to_h.inspect}"
-    Rails.logger.info "CSRF Token: #{request.headers['X-CSRF-Token']}"
-    Rails.logger.info "Params: #{params.inspect}"
   end
 end

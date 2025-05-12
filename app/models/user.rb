@@ -31,7 +31,6 @@ class User < ApplicationRecord
       customer = Stripe::Customer.create(email: email)
       Subscription.create!(user: self, plan_type: 'basic', status: 'active', stripe_customer_id: customer.id)
     rescue Stripe::StripeError => e
-      Rails.logger.error("Failed to create Stripe customer for user #{id}: #{e.message}")
       Subscription.create!(user: self, plan_type: 'basic', status: 'active')
     end
   end
