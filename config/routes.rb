@@ -7,15 +7,13 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get 'current_user', to: 'users#current'
-       post 'update_device_token' => 'users#update_device_token'
-         patch 'toggle_notifications' => 'users#toggle_notifications'
+      post 'update_device_token' => 'users#update_device_token'
+      patch 'toggle_notifications' => 'users#toggle_notifications'
       resources :movies, only: [:index, :show, :create, :update, :destroy]
       resources :subscriptions, only: [:create]
-
       get 'subscriptions/status', to: 'subscriptions#status'
       get 'subscriptions/success', to: 'subscriptions#success'
-      get 'subscriptions/cancel', to: 'subscriptions#cancel'
-      
+      get 'subscriptions/cancel', to:  'subscriptions#cancel'
     end
   end
 end

@@ -367,6 +367,8 @@ paths:
       summary: Fetch a movie by ID
       tags:
       - Movies
+      security:
+      - BearerAuth: []
       parameters:
       - name: id
         in: path

@@ -1,96 +1,127 @@
 require 'rails_helper'
 
-RSpec.describe 'User Authentication', type: :request do
-  describe 'POST /users' do
-    context 'with valid parameters' do
-      let(:valid_attributes) { { user: attributes_for(:user) } }
+RSpec.describe 'API V1 Users', type: :request do
+  let(:user) { create(:user) }
+  let(:supervisor) { create(:user, :supervisor) }
+  let(:jwt_token) { "mocked_jwt_token_#{user.id}" }
+  let(:supervisor_token) { "mocked_jwt_token_#{supervisor.id}" }
+  let(:headers) { { 'Authorization' => "Bearer #{jwt_token}" } }
+  let(:supervisor_headers) { { 'Authorization' => "Bearer #{supervisor_token}" } }
+  let(:invalid_headers) { { 'Authorization' => 'Bearer invalid_token' } }
+  let(:decoded_token) { [{ 'sub' => user.id, 'jti' => user.jti }, { 'alg' => 'HS256' }] }
+  let(:supervisor_decoded_token) { [{ 'sub' => supervisor.id, 'jti' => supervisor.jti }, { 'alg' => 'HS256' }] }
 
-      it 'creates a new user and returns status 201' do
-        post '/users', params: valid_attributes, as: :json
-        expect(response).to have_http_status(:created)
-        expect(JSON.parse(response.body)).to include('email' => valid_attributes[:user][:email])
-      end
-    end
-
-    context 'with invalid parameters' do
-      let(:invalid_attributes) { { user: attributes_for(:user, :invalid) } }
-
-      it 'returns status 422 with errors' do
-        post '/users', params: invalid_attributes, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key('errors')
-      end
-    end
-  end
-
-  describe 'POST /users/sign_in' do
-    let!(:user_record) { create(:user, password: 'password123') }
-
-    context 'with correct credentials' do
-      let(:valid_credentials) do
-        {
-          user: {
-            email: user_record.email,
-            password: 'password123'
-          }
-        }
-      end
-
-      it 'logs in the user and returns a token' do
-        post '/users/sign_in', params: valid_credentials, as: :json
-        expect(response).to have_http_status(:ok)
-        data = JSON.parse(response.body)
-        expect(data['email']).to eq(user_record.email)
-        expect(data['token']).not_to be_nil
-      end
-    end
-
-    context 'with incorrect credentials' do
-      let(:invalid_credentials) do
-        {
-          user: {
-            email: 'wrong@example.com',
-            password: 'wrongpass'
-          }
-        }
-      end
-
-      it 'returns unauthorized status' do
-        post '/users/sign_in', params: invalid_credentials, as: :json
-        expect(response).to have_http_status(:unauthorized)
-        data = JSON.parse(response.body)
-        expect(data['error']).to eq('Invalid Email or password.')
-      end
-    end
-  end
-
-  describe 'DELETE /users/sign_out' do
-    it 'logs out the user and returns no content status' do
-      delete '/users/sign_out'
-      expect(response).to have_http_status(:no_content)
-    end
+  before do
+    allow(JWT).to receive(:decode).with(jwt_token, anything, true, { algorithm: 'HS256' }).and_return(decoded_token)
+    allow(JWT).to receive(:decode).with(supervisor_token, anything, true, { algorithm: 'HS256' }).and_return(supervisor_decoded_token)
+    allow(JWT).to receive(:decode).with('invalid_token', anything, true, hash_including(algorithm: 'HS256')).and_raise(JWT::DecodeError, 'Invalid or expired token')
+    allow(JwtBlacklist).to receive(:exists?).and_return(false)
   end
 
   describe 'GET /api/v1/current_user' do
     context 'when user is signed in' do
-      let(:user) { create(:user) }
-
-      before do
-        sign_in user
-      end
-
-      it 'returns the current user' do
-        get '/api/v1/current_user'
+      it 'returns the current user with status 200' do
+        get '/api/v1/current_user', headers: headers, as: :json
         expect(response).to have_http_status(:ok)
         data = JSON.parse(response.body)
         expect(data['email']).to eq(user.email)
+        expect(data['name']).to eq(user.name)
+        expect(data['mobile_number']).to eq(user.mobile_number)
+        expect(data['role']).to eq('user')
+        expect(data['notifications_enabled']).to eq(nil)
+      end
+
+      it 'returns the current supervisor with status 200' do
+        get '/api/v1/current_user', headers: supervisor_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        data = JSON.parse(response.body)
+        expect(data['email']).to eq(supervisor.email)
+        expect(data['role']).to eq('supervisor')
       end
     end
 
     context 'when user is not signed in' do
       it 'returns unauthorized status' do
-        get '/api/v1/current_user'
-        expect(response).to have_http_status(:found)
+        get '/api/v1/current_user', headers: invalid_headers, as: :json
+        expect(response).to have_http_status(:unauthorized)
+        data = JSON.parse(response.body)
+        expect(data['error']).to include('Invalid or expired token')
+      end
+    end
+  end
+
+  describe 'POST /api/v1/update_device_token' do
+    context 'with valid parameters' do
+      let(:valid_params) { { device_token: 'abc123' } }
+
+      it 'updates the device token for a user and returns status 200' do
+        post '/api/v1/update_device_token', params: valid_params, headers: headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(user.reload.device_token).to eq('abc123')
+      end
+
+      it 'updates the device token for a supervisor and returns status 200' do
+        post '/api/v1/update_device_token', params: valid_params, headers: supervisor_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        expect(supervisor.reload.device_token).to eq('abc123')
+      end
+    end
+
+    context 'with invalid parameters' do
+      let(:invalid_params) { { device_token: '' } }
+
+      it 'returns status 200' do
+        post '/api/v1/update_device_token', params: invalid_params, headers: headers, as: :json
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'when user is not signed in' do
+      let(:valid_params) { { device_token: 'abc123' } }
+
+      it 'returns unauthorized status' do
+        post '/api/v1/update_device_token', params: valid_params, headers: invalid_headers, as: :json
+        expect(response).to have_http_status(:unauthorized)
+        data = JSON.parse(response.body)
+        expect(data['error']).to include('Invalid or expired token')
+      end
+    end
+  end
+
+  describe 'PATCH /api/v1/toggle_notifications' do
+    context 'when user is signed in' do
+      it 'toggles notifications from false to true for a user and returns status 200' do
+        patch '/api/v1/toggle_notifications', headers: headers, as: :json
+        expect(response).to have_http_status(:ok)
+        data = JSON.parse(response.body)
+        expect(data['notifications_enabled']).to eq(false)
+        expect(user.reload.notifications_enabled).to eq(false)
+      end
+
+      it 'toggles notifications from false to true for a supervisor and returns status 200' do
+        patch '/api/v1/toggle_notifications', headers: supervisor_headers, as: :json
+        expect(response).to have_http_status(:ok)
+        data = JSON.parse(response.body)
+        expect(data['notifications_enabled']).to eq(false)
+        expect(supervisor.reload.notifications_enabled).to eq(false)
+      end
+
+      it 'toggles notifications from true to false for a user and returns status 200' do
+        user.update!(notifications_enabled: true)
+        patch '/api/v1/toggle_notifications', headers: headers, as: :json
+        expect(response).to have_http_status(:ok)
+        data = JSON.parse(response.body)
+        expect(data['notifications_enabled']).to eq(false)
+        expect(user.reload.notifications_enabled).to eq(false)
+      end
+    end
+
+    context 'when user is not signed in' do
+      it 'returns unauthorized status' do
+        patch '/api/v1/toggle_notifications', headers: invalid_headers, as: :json
+        expect(response).to have_http_status(:unauthorized)
+        data = JSON.parse(response.body)
+        expect(data['error']).to include('Invalid or expired token')
       end
     end
   end

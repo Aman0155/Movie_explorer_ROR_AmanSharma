@@ -4,7 +4,7 @@ class Movie < ApplicationRecord
 
   validates :title, presence: true
   validates :genre, presence: true
-  validates :release_year, numericality: { only_integer: true, greater_than: 1880, less_than_or_equal_to: Date.current.year + 1 }
+  validates :release_year, numericality: { only_integer: true, greater_than: 1880, less_than_or_equal_to: Date.current.year }
   validates :rating, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }, allow_nil: true
   validates :director, presence: true
   validates :duration, numericality: { only_integer: true, greater_than: 0 }
@@ -13,7 +13,7 @@ class Movie < ApplicationRecord
   validate :banner_content_type, if: :banner_attached?
 
   scope :premium, -> { where(premium: true) }
-  scope :accessible_to_user, ->(user) { user&.premium_access ? all : where(premium: false) }
+  scope :accessible_to_user, ->(user) { user&.subscription&.plan_type == 'premium'  ? all : where(premium: false) }
 
   def poster_attached?
     poster.attached?
