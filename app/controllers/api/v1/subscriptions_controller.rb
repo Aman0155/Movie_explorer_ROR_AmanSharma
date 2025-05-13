@@ -24,7 +24,7 @@ class Api::V1::SubscriptionsController < ApplicationController
         user_id: @current_user.id,
         plan_type: plan_type
       },
-      success_url: "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
+      success_url: "https://dynamic-bavarois-906c5c.netlify.app/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://movie-explorer-ror-amansharma.onrender.com/api/v1/subscriptions/cancel"
     )
 
