@@ -94,17 +94,7 @@ module Api
           movie.banner.attach(params[:movie][:banner])
         end
       end
-
-      def attach_files(movie)
-        if params[:movie][:poster].present? && params[:movie][:poster].is_a?(ActionDispatch::Http::UploadedFile)
-          movie.poster.attach(params[:movie][:poster])
-        end
-
-        if params[:movie][:banner].present? && params[:movie][:banner].is_a?(ActionDispatch::Http::UploadedFile)
-          movie.banner.attach(params[:movie][:banner])
-        end
-      end
-
+      
       def ensure_supervisor
         unless @current_user&.supervisor?
           render json: { error: 'Forbidden: Supervisor access required' }, status: :forbidden and return
@@ -117,14 +107,8 @@ module Api
         device_tokens = users.pluck(:device_token)
         begin
           fcm_service = FcmService.new
-          response = fcm_service.send_notification(device_tokens, "New Movie Added!", "#{movie.title} has been added to the Movie Explorer collection.", { movie_id: movie.id.to_s })
-          if response[:status_code] == 200
-            Rails.logger.info("FCM Response: #{response}")
-          else
-            Rails.logger.error("FCM Error: #{response[:body]}")
-          end
-        rescue StandardError => e
-          Rails.logger.error("FCM Notification Failed: #{e.message}")
+          fcm_service.send_notification(device_tokens, "New Movie Added!", "#{movie.title} has been added to the Movie Explorer collection.", { movie_id: movie.id.to_s })
+        rescue StandardError
         end
       end
     end
