@@ -8,11 +8,11 @@ class Api::V1::SubscriptionsController < ApplicationController
     return render json: { error: 'Invalid plan type' }, status: :bad_request unless %w[1_day 1_month 3_months].include?(plan_type)
     price_id = case plan_type
                when '1_day'
-                 'price_1RM2YZ6z4kuZ7s4VUNG7edLC'
+                 ENV['1_DAY_ID']
                when '1_month'
-                 'price_1RM2Zc6z4kuZ7s4V4CbVemBJ'
+                ENV['1_MONTH_ID']
                when '3_months'
-                 'price_1RM2aT6z4kuZ7s4VuMmZLNqn'
+                 ENV['3_MONTHS_ID']
                end
 
     session = Stripe::Checkout::Session.create(
@@ -24,8 +24,8 @@ class Api::V1::SubscriptionsController < ApplicationController
         user_id: @current_user.id,
         plan_type: plan_type
       },
-      success_url: "https://dynamic-bavarois-906c5c.netlify.app/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "https://movie-explorer-ror-amansharma.onrender.com/api/v1/subscriptions/cancel"
+      success_url: "#{ENV['SUCCESS_URL']}?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "#{ENV['CANCEL_URL']}"
     )
 
     render json: { session_id: session.id, url: session.url }, status: :ok
