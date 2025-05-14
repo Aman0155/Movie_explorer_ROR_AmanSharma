@@ -50,3 +50,7 @@ group :test do
   gem 'webmock'
 end
 gem "psych", "~> 5.2"
+
+group :test do
+  gem 'simplecov', require: false
+end
