@@ -593,7 +593,7 @@ paths:
                 properties:
                   plan_type:
                     type: string
-                    enum: ["free", "basic", "premium"]
+                    enum: [ "basic", "premium"]
                     description: Current subscription plan type
                   message:
                     type: string
@@ -763,7 +763,7 @@ components:
           description: ID of the associated user
         plan_type:
           type: string
-          enum: ["free", "basic", "premium"]
+          enum: ["basic", "premium"]
           description: Type of subscription plan
         status:
           type: string
