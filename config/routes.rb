@@ -16,4 +16,4 @@ Rails.application.routes.draw do
       get 'subscriptions/cancel', to:  'subscriptions#cancel'
     end
   end
-end
+end     

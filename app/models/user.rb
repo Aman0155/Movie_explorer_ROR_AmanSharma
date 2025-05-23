@@ -10,7 +10,6 @@ class User < ApplicationRecord
   validates :name, presence: true, length: { maximum: 100, minimum: 3 }
   validates :mobile_number, presence: true, format: { with: /\A(\+?[1-9]\d{0,3})?\d{9,14}\z/ }, uniqueness: true
   validates :email, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :password, format: { with: /\A(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}\z/, message: "The password must include at least one uppercase letter, one lowercase letter, one digit, one special character, and have a minimum of 8 characters." }
 
   scope :by_role, ->(role) { where(role: role) }
   scope :recent, -> { order(created_at: :desc) }
