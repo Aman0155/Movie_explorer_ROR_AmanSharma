@@ -8,11 +8,11 @@ class Api::V1::SubscriptionsController < ApplicationController
     return render json: { error: 'Invalid plan type' }, status: :bad_request unless %w[1_day 1_month 3_months].include?(plan_type)
     price_id = case plan_type
                when '1_day'
-                 "#{ENV['1_DAY_ID']}"
+                 "#{ENV['ONE_DAY_ID']}"
                when '1_month'
-                 "#{ENV['1_MONTH_ID']}"
+                 "#{ENV['ONE_MONTH_ID']}"
                when '3_months'
-                 "#{ENV['3_MONTHS_ID']}"
+                 "#{ENV['THREE_MONTHS_ID']}"
                end
 
     session = Stripe::Checkout::Session.create(
