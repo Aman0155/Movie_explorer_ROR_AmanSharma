@@ -1,5 +1,5 @@
 class Api::V1::SubscriptionsController < ApplicationController
-  before_action :authenticate_user!, except: [:success]
+  before_action :authenticate_user!, except: [:success, :cancel]
   skip_before_action :verify_authenticity_token
 
   def create
