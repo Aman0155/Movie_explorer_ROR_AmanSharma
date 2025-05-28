@@ -5,7 +5,7 @@ require 'stringio'
 
 class FcmService
   def initialize
-    @credentials = Rails.application.credentials.fcm[:service_account]
+    @credentials = Rails.application.credentials.fcm[:service_account] 
     raise 'FCM service account credentials not found' if @credentials.nil?
 
     json_string = @credentials.to_json

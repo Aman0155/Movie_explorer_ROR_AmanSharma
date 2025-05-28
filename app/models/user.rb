@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   has_one :subscription, dependent: :destroy
+  has_many :wishlists, dependent: :destroy
+  has_many :wishlist_movies, through: :wishlists, source: :movie
   after_create :create_default_subscription
   include Devise::JWT::RevocationStrategies::JTIMatcher
 
@@ -23,9 +25,9 @@ class User < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [] 
+    ["subscription", "wishlists", "wishlist_movies"]
   end
-  
+
   def create_default_subscription
     begin 
       customer = Stripe::Customer.create(email: email)

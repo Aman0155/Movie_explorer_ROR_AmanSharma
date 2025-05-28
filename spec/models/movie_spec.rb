@@ -4,6 +4,9 @@ RSpec.describe Movie, type: :model do
   let(:movie) { build(:movie) }
   let(:invalid_movie) { build(:movie, :invalid) }
   let(:movie_without_attachments) { build(:movie, :without_attachments) }
+  let(:user_with_premium) { build(:user, subscription: build(:subscription, plan_type: 'premium')) }
+  let(:user_without_premium) { build(:user, subscription: build(:subscription, plan_type: 'basic')) }
+  let(:user_without_subscription) { build(:user, subscription: nil) }
 
   describe "validations" do
     it "is valid with valid attributes" do
@@ -110,14 +113,106 @@ RSpec.describe Movie, type: :model do
       expect(movie).not_to be_valid
       expect(movie.errors[:banner]).to include("must be a JPEG or PNG image")
     end
+
+    # New validation edge case tests
+    it "is valid with minimum release year (1881)" do
+      movie.release_year = 1881
+      expect(movie).to be_valid
+    end
+
+    it "is valid with current release year" do
+      movie.release_year = Date.current.year
+      expect(movie).to be_valid
+    end
+
+    it "is valid with minimum duration (1 minute)" do
+      movie.duration = 1
+      expect(movie).to be_valid
+    end
+
+    it "is valid with maximum description length (1000 characters)" do
+      movie.description = "a" * 1000
+      expect(movie).to be_valid
+    end
+
+    it "is valid with valid poster content type (JPEG)" do
+      movie.poster.attach(io: StringIO.new("fake_image_data"), filename: "poster.jpg", content_type: "image/jpeg")
+      expect(movie).to be_valid
+    end
+
+    it "is valid with valid banner content type (PNG)" do
+      movie.banner.attach(io: StringIO.new("fake_image_data"), filename: "banner.png", content_type: "image/png")
+      expect(movie).to be_valid
+    end
   end
 
   describe "scopes" do
+    let(:premium_movie) { create(:movie, premium: true) }
+    let(:regular_movie) { create(:movie, premium: false) }
+
     it "filters premium movies" do
-      premium_movie = create(:movie, premium: true)
-      regular_movie = create(:movie, premium: false)
       expect(Movie.premium).to include(premium_movie)
       expect(Movie.premium).not_to include(regular_movie)
+    end
+
+    # New scope tests for accessible_to_user
+    describe ".accessible_to_user" do
+      it "returns all movies for a premium user" do
+        expect(Movie.accessible_to_user(user_with_premium)).to include(premium_movie, regular_movie)
+      end
+
+      it "returns only non-premium movies for a basic user" do
+        expect(Movie.accessible_to_user(user_without_premium)).to include(regular_movie)
+        expect(Movie.accessible_to_user(user_without_premium)).not_to include(premium_movie)
+      end
+
+      it "returns only non-premium movies for a user without subscription" do
+        expect(Movie.accessible_to_user(user_without_subscription)).to include(regular_movie)
+        expect(Movie.accessible_to_user(user_without_subscription)).not_to include(premium_movie)
+      end
+
+      it "returns only non-premium movies for nil user" do
+        expect(Movie.accessible_to_user(nil)).to include(regular_movie)
+        expect(Movie.accessible_to_user(nil)).not_to include(premium_movie)
+      end
+    end
+  end
+
+  describe "attachment methods" do
+    describe "#poster_attached?" do
+      it "returns true when poster is attached" do
+        movie.poster.attach(io: StringIO.new("fake_image_data"), filename: "poster.jpg", content_type: "image/jpeg")
+        expect(movie.poster_attached?).to be true
+      end
+
+      it "returns false when poster is not attached" do
+        expect(movie.poster_attached?).to be false
+      end
+    end
+
+    describe "#banner_attached?" do
+      it "returns true when banner is attached" do
+        movie.banner.attach(io: StringIO.new("fake_image_data"), filename: "banner.png", content_type: "image/png")
+        expect(movie.banner_attached?).to be true
+      end
+
+      it "returns false when banner is not attached" do
+        expect(movie.banner_attached?).to be false
+      end
+    end
+  end
+
+  describe "ransack methods" do
+    describe ".ransackable_associations" do
+      it "returns the correct ransackable associations" do
+        expect(Movie.ransackable_associations).to match_array(["banner_attachment", "banner_blob", "poster_attachment", "poster_blob"])
+      end
+    end
+
+    describe ".ransackable_attributes" do
+      it "returns the correct ransackable attributes" do
+        expect(Movie.ransackable_attributes).to match_array(["title", "genre", "release_year", "director", "duration", "description", "premium", "rating"])
+      end
     end
   end
 end
