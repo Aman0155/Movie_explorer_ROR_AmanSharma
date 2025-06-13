@@ -359,8 +359,8 @@
           1,
           1,
           null,
-          5,
-          5,
+          1,
+          1,
           null,
           1,
           0,
@@ -406,6 +406,8 @@
       },
       "C:/Users/aman.sharma/Desktop/movie_explorer_ror_AmanSharma/app/models/user.rb": {
         "lines": [
+          1,
+          1,
           1,
           1,
           1,
@@ -726,6 +728,78 @@
         ],
         "branches": {}
       },
+      "C:/Users/aman.sharma/Desktop/movie_explorer_ror_AmanSharma/app/controllers/api/v1/wishlists_controller.rb": {
+        "lines": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {}
+      },
       "C:/Users/aman.sharma/Desktop/movie_explorer_ror_AmanSharma/app/controllers/users/registrations_controller.rb": {
         "lines": [
           0,
@@ -888,6 +962,25 @@
         ],
         "branches": {}
       },
+      "C:/Users/aman.sharma/Desktop/movie_explorer_ror_AmanSharma/app/models/wishlist.rb": {
+        "lines": [
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {}
+      },
       "C:/Users/aman.sharma/Desktop/movie_explorer_ror_AmanSharma/app/serializers/movie_serializer.rb": {
         "lines": [
           0,
@@ -905,6 +998,23 @@
           0,
           0,
           0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {}
+      },
+      "C:/Users/aman.sharma/Desktop/movie_explorer_ror_AmanSharma/app/serializers/wishlist_serializer.rb": {
+        "lines": [
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
           0,
           0,
           0,
@@ -981,6 +1091,6 @@
         "branches": {}
       }
     },
-    "timestamp": 1748336875
+    "timestamp": 1748418304
   }
 }
